@@ -16,6 +16,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import sys
+import math
+from sage.all import *
 
 # From equation 10.4.31 on page 328
 def quasi_interpolate(m, r, t):
@@ -30,8 +33,37 @@ def quasi_interpolate(m, r, t):
   return return_value
 
 # From equation 10.4.32 on page 329
-def alpha(m, j, k):
-  pass
+def alpha(m, j, k, t):
+  alpha_sum = 0
+  for l in range(0, m + 1):
+    # Derive the lagrange l times
+    derived_lagrange = lagrange(m, j, k, t)
+    for q in range(0, l):
+      derived_lagrange = derivative(derived_lagrange)
+    
+    # Derive g m-l times
+    derived_g = g(m, j, t)
+    for q in range(0, m - l):
+      derived_g = derivative(derived_g)
+    
+    alpha_sum += ((-1)**l)*derived_lagrange.subs(x=0)*derived_g.subs(x=0)
+  return 1.0/math.factorial(m) * alpha_sum
+
+# From equation 10.4.28 on page 328
+def lagrange(m, j, k, t):
+  x = var('x')
+  res = 1
+  for l in (remove_value_from_list(k, range(j, (j + m) + 1))):
+    res = res * (x - t[l])/(t[k] - t[l])
+  return res 
+
+# From equation 10.4.3 on page 322
+def g(m, j, t):
+  res = 1
+  x = var('x')
+  for k in range(1, m + 1):
+    res = res * (x - t[j + k])
+  return res
 
 def f(k, t):
   pass
@@ -42,7 +74,6 @@ def b_spline(m, j, x, t):
   summation = 0
   for k in range(j, (j + m + 1) + 1):
     prod = 1
-
     for l in (remove_value_from_list(k, range(j, (j + m + 1) + 1))):
       prod = prod * (t[l] - t[k])
     summation += (1/prod) * truncated_power(x, t[k], m)
@@ -52,7 +83,6 @@ def b_spline(m, j, x, t):
 # evaluate the function, otherwise its 0
 # From equation 10.1.13 page 289
 def truncated_power(x, tk, m):
-  sub = x - tk
   if(x - tk >= 0):
     return (x - tk)**m
   else:
