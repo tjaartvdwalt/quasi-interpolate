@@ -76,7 +76,7 @@ def b_spline(m, j, x, t):
     prod = 1
     for l in (remove_value_from_list(k, range(j, (j + m + 1) + 1))):
       prod = prod * (t[l] - t[k])
-    summation += (1/prod) * truncated_power(x, t[k], m)
+    summation += (1.0/prod) * truncated_power(x, t[k], m)
   return (t[j + m + 1] - t[j]) * summation
 
 # If the value of the function of form f=(x - tk)^m is positive 
